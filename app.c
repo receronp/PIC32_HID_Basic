@@ -336,11 +336,46 @@ void APP_Tasks (void )
 
                 switch(appData.receiveDataBuffer[0])
                 {
-                    case 0x80:
+                    case 0x01:
+                        if (appData.receiveDataBuffer[1] == 1)
+                            BSP_LEDOn(APP_USB_LED_1);
+                        else
+                            BSP_LEDOff(APP_USB_LED_1);
+                        appData.hidDataReceived = false;
+                        USB_DEVICE_HID_ReportReceive (USB_DEVICE_HID_INDEX_0,
+                                &appData.rxTransferHandle, appData.receiveDataBuffer, 64);
+                        appData.state = APP_STATE_MAIN_TASK;
+                        break;
+                    case 0x02:
+                        if (appData.receiveDataBuffer[1] == 1)
+                            BSP_LEDOn(APP_USB_LED_2);
+                        else
+                            BSP_LEDOff(APP_USB_LED_2);
+                        appData.hidDataReceived = false;
+                        USB_DEVICE_HID_ReportReceive (USB_DEVICE_HID_INDEX_0,
+                                &appData.rxTransferHandle, appData.receiveDataBuffer, 64);
+                        appData.state = APP_STATE_MAIN_TASK;
+                        break;
+                    case 0x03:
 
                         /* Toggle on board LED1 to LED2. */
                         BSP_LEDToggle( APP_USB_LED_1 );
                         BSP_LEDToggle( APP_USB_LED_2 );
+                        //BSP_LEDToggle( APP_USB_LED_3 );
+
+                        appData.hidDataReceived = false;
+
+                        /* Place a new read request. */
+                        USB_DEVICE_HID_ReportReceive (USB_DEVICE_HID_INDEX_0,
+                                &appData.rxTransferHandle, appData.receiveDataBuffer, 64 );
+                        
+                        appData.state = APP_STATE_MAIN_TASK;
+
+                        break;
+                    case 0x80:
+
+                        /* Toggle on board LED3. */
+                        BSP_LEDToggle( APP_USB_LED_3 );
 
                         appData.hidDataReceived = false;
 
@@ -348,6 +383,8 @@ void APP_Tasks (void )
                         USB_DEVICE_HID_ReportReceive (USB_DEVICE_HID_INDEX_0,
                                 &appData.rxTransferHandle, appData.receiveDataBuffer, 64 );
 
+                        appData.state = APP_STATE_MAIN_TASK;        
+                        
                         break;
 
                     case 0x81:
@@ -359,16 +396,18 @@ void APP_Tasks (void )
                              * command. */
 
                             appData.transmitDataBuffer[0] = 0x81;
-
-                            if( BSP_SwitchStateGet(APP_USB_SWITCH_1) == BSP_SWITCH_STATE_PRESSED )
-                            {
-                                appData.transmitDataBuffer[1] = 0x00;
-                            }
-                            else
-                            {
+                            
+                            appData.transmitDataBuffer[1] = 0x00;
+                            if( BSP_SwitchStateGet(APP_USB_SWITCH_1) == BSP_SWITCH_STATE_RELEASED ) {
                                 appData.transmitDataBuffer[1] = 0x01;
                             }
-
+                            if( BSP_SwitchStateGet(APP_USB_SWITCH_2) == BSP_SWITCH_STATE_RELEASED ) {
+                                appData.transmitDataBuffer[1] |= 0x02;
+                            }
+                            if( BSP_SwitchStateGet(APP_USB_SWITCH_3) == BSP_SWITCH_STATE_RELEASED ) {
+                                appData.transmitDataBuffer[1] |= 0x04;
+                            }
+                            
                             appData.hidDataTransmitted = false;
 
                             /* Prepare the USB module to send the data packet to the host */
@@ -381,8 +420,54 @@ void APP_Tasks (void )
                             USB_DEVICE_HID_ReportReceive (USB_DEVICE_HID_INDEX_0,
                                     &appData.rxTransferHandle, appData.receiveDataBuffer, 64 );
                         }
+                        
+                        appData.state = APP_STATE_MAIN_TASK;        
+
                         break;
 
+                    case 0x82:
+
+                        if(appData.hidDataTransmitted)
+                        {
+                            
+                            appData.transmitDataBuffer[0] = 0x82;
+                            appData.transmitDataBuffer[1] = 'A';
+                            appData.transmitDataBuffer[2] = '0';
+                            appData.transmitDataBuffer[3] = '0';
+                            appData.transmitDataBuffer[4] = '8';
+                            appData.transmitDataBuffer[5] = '2';
+                            appData.transmitDataBuffer[6] = '3';
+                            appData.transmitDataBuffer[7] = '9';
+                            appData.transmitDataBuffer[8] = '0';
+                            appData.transmitDataBuffer[9] = '6';
+                            appData.transmitDataBuffer[10] = ' ';
+                            appData.transmitDataBuffer[11] = 'A';
+                            appData.transmitDataBuffer[12] = '0';
+                            appData.transmitDataBuffer[13] = '0';
+                            appData.transmitDataBuffer[14] = '5';
+                            appData.transmitDataBuffer[15] = '7';
+                            appData.transmitDataBuffer[16] = '0';
+                            appData.transmitDataBuffer[17] = '9';
+                            appData.transmitDataBuffer[18] = '1';
+                            appData.transmitDataBuffer[19] = '0';                         
+                            appData.transmitDataBuffer[20] = 0x00;
+                                                      
+                            appData.hidDataTransmitted = false;
+
+                            /* Prepare the USB module to send the data packet to the host */
+                            USB_DEVICE_HID_ReportSend (USB_DEVICE_HID_INDEX_0,
+                                    &appData.txTransferHandle, appData.transmitDataBuffer, 64 );
+
+                            appData.hidDataReceived = false;
+
+                            /* Place a new read request. */
+                            USB_DEVICE_HID_ReportReceive (USB_DEVICE_HID_INDEX_0,
+                                    &appData.rxTransferHandle, appData.receiveDataBuffer, 64 );
+                        }
+                        
+                        appData.state = APP_STATE_MAIN_TASK;       
+                        break;
+                        
                     default:
 
                         appData.hidDataReceived = false;
@@ -390,6 +475,9 @@ void APP_Tasks (void )
                         /* Place a new read request. */
                         USB_DEVICE_HID_ReportReceive (USB_DEVICE_HID_INDEX_0,
                                 &appData.rxTransferHandle, appData.receiveDataBuffer, 64 );
+                        
+                        appData.state = APP_STATE_MAIN_TASK;        
+
                         break;
                 }
             }

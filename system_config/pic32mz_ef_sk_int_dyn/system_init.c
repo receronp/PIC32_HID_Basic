@@ -261,8 +261,8 @@ const USB_DEVICE_DESCRIPTOR deviceDescriptor =
     0x00,                           // Subclass code
     0x00,                           // Protocol code
     USB_DEVICE_EP0_BUFFER_SIZE,     // Max packet size for EP0, see system_config.h
-    0x04D8,                         // Vendor ID
-    0x003F,                         // Product ID
+    0x0000,                         // Vendor ID
+    0x2021,                         // Product ID
     0x0100,                         // Device release number in BCD format
     0x01,                           // Manufacturer string index
     0x02,                           // Product string index
@@ -448,9 +448,9 @@ USB_DEVICE_CONFIGURATION_DESCRIPTORS_TABLE fullSpeedConfigDescSet[1] =
         USB_DESCRIPTOR_STRING,  // STRING descriptor type
         {0x0409}                // Language ID
     };
-/*******************************************
+/***************
  *  Manufacturer string descriptor
- *******************************************/
+ ***************/
     const struct
     {
         uint8_t bLength;        // Size of this descriptor in bytes
@@ -461,10 +461,9 @@ USB_DEVICE_CONFIGURATION_DESCRIPTORS_TABLE fullSpeedConfigDescSet[1] =
     {
         sizeof(sd001),
         USB_DESCRIPTOR_STRING,
-        {'M','i','c','r','o','c','h','i','p',' ','T','e','c','h','n','o','l','o','g','y',' ','I','n','c','.'}
-		
+        {'A','0','0','8','2','3','9','0','6',' ','A','0','0','5','7','0','9','1','0'}
     };
-
+    
 /*******************************************
  *  Product string descriptor
  *******************************************/
