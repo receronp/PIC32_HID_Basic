@@ -120,6 +120,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Section: Driver Initialization Data
 // *****************************************************************************
 // *****************************************************************************
+// <editor-fold defaultstate="collapsed" desc="DRV_Timer Initialization Data">
 /*** TMR Driver Initialization Data ***/
 
 const DRV_TMR_INIT drvTmr0InitData =
@@ -132,6 +133,7 @@ const DRV_TMR_INIT drvTmr0InitData =
     .interruptSource = DRV_TMR_INTERRUPT_SOURCE_IDX0,
     .asyncWriteEnable = false,
 };
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="DRV_USB Initialization Data">
 /******************************************************
  * USB Driver Initialization
@@ -208,7 +210,7 @@ const uint8_t hid_rpt0[] =
     0x19, 0x01,             // Usage Minimum
     0x29, 0x40,             // Usage Maximum 	//64 input usages total (0x01 to 0x40)
     0x15, 0x01,             // Logical Minimum (data bytes in the report may have minimum value = 0x00)
-    0x25, 0x40,      	    // Logical Maximum (data bytes in the report may have maximum value = 0x00FF = unsigned 255)
+    0x25, 0xFF,      	    // Logical Maximum (data bytes in the report may have maximum value = 0x00FF = unsigned 255)
     0x75, 0x08,             // Report Size: 8-bit field size
     0x95, 0x40,             // Report Count: Make sixty-four 8-bit fields (the next time the parser hits an "Input", "Output", or "Feature" item)
     0x81, 0x00,             // Input (Data, Array, Abs): Instantiates input packet fields based on the above report size, count, logical min/max, and usage.
@@ -261,8 +263,10 @@ const USB_DEVICE_DESCRIPTOR deviceDescriptor =
     0x00,                           // Subclass code
     0x00,                           // Protocol code
     USB_DEVICE_EP0_BUFFER_SIZE,     // Max packet size for EP0, see system_config.h
-    0x04D8,                         // Vendor ID
-    0x003F,                         // Product ID
+    0x0000,                         // Tec de Monterrey Prototype VID
+//    0x04D8,                         // Vendor ID
+    0x2018,                         // GenIO AD2018 PID
+//    0x003F,                         // Product ID
     0x0100,                         // Device release number in BCD format
     0x01,                           // Manufacturer string index
     0x02,                           // Product string index
@@ -341,7 +345,7 @@ const uint8_t highSpeedConfigurationDescriptor[]=
 
     0x07,                           // Size of this descriptor in bytes
     USB_DESCRIPTOR_ENDPOINT,        // Endpoint Descriptor
-    1 | USB_EP_DIRECTION_OUT,   // EndpointAddress ( EP1 OUT )
+    2 | USB_EP_DIRECTION_OUT,   // EndpointAddress ( EP1 OUT )
     USB_TRANSFER_TYPE_INTERRUPT,    // Attributes
     0x40,0x00,                      // size
     0x01,                           // Interval
@@ -410,7 +414,7 @@ const uint8_t fullSpeedConfigurationDescriptor[]=
 
     0x07,                           // Size of this descriptor in bytes
     USB_DESCRIPTOR_ENDPOINT,        // Endpoint Descriptor
-    1 | USB_EP_DIRECTION_OUT,   // EndpointAddress ( EP1 OUT )
+    2 | USB_EP_DIRECTION_OUT,   // EndpointAddress ( EP1 OUT )
     USB_TRANSFER_TYPE_INTERRUPT,    // Attributes
     0x40,0x00,                      // size
     0x01,                           // Interval
@@ -461,8 +465,7 @@ USB_DEVICE_CONFIGURATION_DESCRIPTORS_TABLE fullSpeedConfigDescSet[1] =
     {
         sizeof(sd001),
         USB_DESCRIPTOR_STRING,
-        {'M','i','c','r','o','c','h','i','p',' ','T','e','c','h','n','o','l','o','g','y',' ','I','n','c','.'}
-		
+        {'T','e','c','n','o','l','o','g','i','c','o',' ','d','e',' ','M','o','n','t','e','r','r','e','y','.'}
     };
 
 /*******************************************
@@ -472,13 +475,13 @@ USB_DEVICE_CONFIGURATION_DESCRIPTORS_TABLE fullSpeedConfigDescSet[1] =
     {
         uint8_t bLength;        // Size of this descriptor in bytes
         uint8_t bDscType;       // STRING descriptor type
-        uint16_t string[22];    // String
+        uint16_t string[23];    // String
     }
     sd002 =
     {
         sizeof(sd002),
         USB_DESCRIPTOR_STRING,
-		{'S','i','m','p','l','e',' ','H','I','D',' ','D','e','v','i','c','e',' ','D','e','m','o'}
+		{'G','e','n','I','O',':',' ','G','e','n','e','r','i','c',' ','I','/','O',' ','D','e','m','o'}
     }; 
 
 /***************************************
@@ -562,6 +565,7 @@ void SYS_Initialize ( void* data )
     SYS_CLK_Initialize( NULL );
     SYS_DEVCON_Initialize(SYS_DEVCON_INDEX_0, (SYS_MODULE_INIT*)NULL);
     SYS_DEVCON_PerformanceConfig(SYS_CLK_SystemFrequencyGet());
+    SYS_PORTS_Initialize();
 
     /* Board Support Package Initialization */
     BSP_Initialize();        
@@ -569,7 +573,6 @@ void SYS_Initialize ( void* data )
     /* Initialize Drivers */
 
     sysObj.drvTmr0 = DRV_TMR_Initialize(DRV_TMR_INDEX_0, (SYS_MODULE_INIT *)&drvTmr0InitData);
-
 
     SYS_INT_VectorPrioritySet(INT_VECTOR_T2, INT_PRIORITY_LEVEL4);
     SYS_INT_VectorSubprioritySet(INT_VECTOR_T2, INT_SUBPRIORITY_LEVEL0);
@@ -592,7 +595,6 @@ void SYS_Initialize ( void* data )
     
 
     /* Initialize System Services */
-    SYS_PORTS_Initialize();
 
     /*** Interrupt Service Initialization Code ***/
     SYS_INT_Initialize();

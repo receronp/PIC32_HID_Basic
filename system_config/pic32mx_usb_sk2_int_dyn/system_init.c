@@ -284,7 +284,7 @@ const uint8_t fullSpeedConfigurationDescriptor[]=
 
     0x07,                           // Size of this descriptor in bytes
     USB_DESCRIPTOR_ENDPOINT,        // Endpoint Descriptor
-    1 | USB_EP_DIRECTION_OUT,   // EndpointAddress ( EP1 OUT )
+    2 | USB_EP_DIRECTION_OUT,   // EndpointAddress ( EP1 OUT )
     USB_TRANSFER_TYPE_INTERRUPT,    // Attributes
     0x40,0x00,                      // size
     0x01,                           // Interval
@@ -335,7 +335,7 @@ USB_DEVICE_CONFIGURATION_DESCRIPTORS_TABLE fullSpeedConfigDescSet[1] =
     {
         sizeof(sd001),
         USB_DESCRIPTOR_STRING,
-        {'M','i','c','r','o','c','h','i','p',' ','T','e','c','h','n','o','l','o','g','y',' ','I','n','c','.'}
+        {'T','e','c','n','o','l','o','g','i','c','o',' ','d','e',' ','M','o','n','t','e','r','r','e','y','.'}
 		
     };
 
@@ -437,6 +437,7 @@ void SYS_Initialize ( void* data )
     SYS_DEVCON_Initialize(SYS_DEVCON_INDEX_0, (SYS_MODULE_INIT*)NULL);
     SYS_DEVCON_PerformanceConfig(SYS_CLK_SystemFrequencyGet());
     SYS_DEVCON_JTAGEnable();
+    SYS_PORTS_Initialize();
 
     /* Board Support Package Initialization */
     BSP_Initialize();        
@@ -452,7 +453,6 @@ void SYS_Initialize ( void* data )
     SYS_INT_VectorSubprioritySet(INT_VECTOR_USB1, INT_SUBPRIORITY_LEVEL0);
 
     /* Initialize System Services */
-    SYS_PORTS_Initialize();
 
     /*** Interrupt Service Initialization Code ***/
     SYS_INT_Initialize();
